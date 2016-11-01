@@ -39,3 +39,7 @@ sbt run
 
 and select which example will be started.
 
+
+## Presentation
+
+You can also check presentation prepared for `Hack Your Career` event. [Presentation](https://github.com/lszymik/actormodel)
