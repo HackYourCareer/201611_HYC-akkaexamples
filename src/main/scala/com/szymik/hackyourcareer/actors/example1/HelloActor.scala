@@ -22,9 +22,10 @@ class HelloActor extends Actor with ActorLogging {
   override def receive: Receive = {
 
     case SayHello(message) ⇒
+      val savedSender = sender()
       log.info(message)
 
-      sender() ! Done("Good job!")
+      savedSender ! Done("Good job!")
   }
 
 }

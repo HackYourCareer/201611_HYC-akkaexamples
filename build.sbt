@@ -32,13 +32,14 @@ libraryDependencies ++= {
     "ch.qos.logback" % "logback-classic" % logbackVersion,
     "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion,
 
-    // Tests
-    "com.typesafe.akka" %% "akka-http-testkit" % akkaVersion,
-    "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
+    // tests
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
-    "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % "test",
-    "org.scalamock" %% "scalamock-scalatest-support" % scalaMockVersion % "test",
-    "org.pegdown" % "pegdown" % pegdownVersion % "test"
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaVersion % "test",
+    "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+      exclude("org.scala-lang", "scala-reflect"),
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.2.2" % "test"
+      exclude("org.scala-lang", "scala-reflect"),
+    "org.pegdown" % "pegdown" % "1.6.0" % "test"
   )
 }
 
