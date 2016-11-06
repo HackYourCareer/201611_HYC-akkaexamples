@@ -1,8 +1,10 @@
-package com.szymik.hackyourcareer.actors.example2
+package com.szymik.hackyourcareer.actors.example3
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
-import com.szymik.hackyourcareer.actors.example2.CalculationManager.{Calculate, CalculationResult}
-import com.szymik.hackyourcareer.actors.example2.Worker.{Factorial, Result}
+import com.szymik.hackyourcareer.actors.example3.CalculationManager.{Calculate, CalculationResult}
+import com.szymik.hackyourcareer.actors.example3.Worker.{Factorial, Result}
+
+import scala.concurrent.duration._
 
 object CalculationManager {
 
@@ -18,13 +20,21 @@ object CalculationManager {
     *
     * @param results of calculation.
     */
-  case class CalculationResult(results: Map[Int, BigInt])
+  case class CalculationResult(results: Map[Int, Either[CalculationError, BigInt]])
 
   def props(): Props = Props(new CalculationManagerActor())
 
 }
 
 class CalculationManagerActor extends Actor with ActorLogging {
+
+  case object Timeout
+
+  import context.dispatcher
+
+  override def preStart(): Unit = {
+    context.system.scheduler.scheduleOnce(50 milliseconds, self, Timeout)
+  }
 
   override def receive: Receive = {
 
@@ -42,7 +52,7 @@ class CalculationManagerActor extends Actor with ActorLogging {
       }
   }
 
-  def waitForResults(amount: Int, results: Map[Int, BigInt], replyTo: ActorRef): Receive = {
+  def waitForResults(amount: Int, results: Map[Int, Either[CalculationError, BigInt]], replyTo: ActorRef): Receive = {
 
     case Result(index, value) ⇒
       val newResult = results + (index → value)
@@ -53,6 +63,12 @@ class CalculationManagerActor extends Actor with ActorLogging {
       else {
         replyTo ! CalculationResult(newResult)
       }
+
+    case Timeout ⇒
+      val missingResults: Map[Int, Either[CalculationError, BigInt]] = (0 until amount).filterNot(results.contains)
+        .map(i ⇒ i -> Left(CalculationError("Calculation has been timed out."))).toMap
+
+      replyTo ! CalculationResult(missingResults ++ results)
   }
 
   private def startWorkers(howMuch: Int): Map[Int, ActorRef] = {

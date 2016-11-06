@@ -1,8 +1,8 @@
-package com.szymik.hackyourcareer.actors.example2
+package com.szymik.hackyourcareer.actors.example3
 
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.pattern.pipe
-import com.szymik.hackyourcareer.actors.example2.Worker.{Factorial, Result}
+import com.szymik.hackyourcareer.actors.example3.Worker.{Factorial, Result}
 
 import scala.annotation.tailrec
 import scala.concurrent.Future
@@ -23,10 +23,10 @@ object Worker {
   /**
     * Result of calculation.
     *
-    * @param index  identifier of worker actor and its result.
+    * @param index identifier of worker actor and its result.
     * @param value of calculation.
     */
-  case class Result(index: Int, value: BigInt)
+  case class Result(index: Int, value: Either[CalculationError, BigInt])
 
   /**
     * Props for creating actor.
@@ -44,9 +44,16 @@ class WorkerActor(index: Int) extends Actor with ActorLogging {
   import context.dispatcher
 
   override def receive: Receive = {
+    case Factorial(number) if number == 10 ⇒
+      log.info(s"Actor with index $index is simple stupid.")
+
+    case Factorial(number) if number == 5 ⇒
+      log.info(s"Actor with index $index do not want to calculate.")
+      factorial(number).map(_ ⇒ Result(index, Left(CalculationError("Actor refused calculation for value 5")))) pipeTo sender()
+
     case Factorial(number) ⇒
       log.info(s"Actor with index $index is calculating result.")
-      factorial(number).map(Result(index, _)) pipeTo sender()
+      factorial(number).map(x ⇒ Result(index, Right(x))) pipeTo sender()
   }
 
   /**

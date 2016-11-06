@@ -1,7 +1,7 @@
-package com.szymik.hackyourcareer.actors.example2
+package com.szymik.hackyourcareer.actors.example3
 
 import akka.actor.{Actor, ActorLogging, PoisonPill, Props}
-import com.szymik.hackyourcareer.actors.example2.CalculationManager.{Calculate, CalculationResult}
+import com.szymik.hackyourcareer.actors.example3.CalculationManager.{Calculate, CalculationResult}
 
 object MainActor {
 
@@ -34,9 +34,12 @@ class MainActor extends Actor with ActorLogging {
       self ! PoisonPill
   }
 
-  private def buildResponseWithValues(results: Map[Int, BigInt]): String = {
-    results.map { case (index, value) ⇒ // .toSeq.sortBy(_._1)
-      s"\nCalculation number $index returned $value"
+  private def buildResponseWithValues(results: Map[Int, Either[CalculationError, BigInt]]): String = {
+    results.toSeq.sortBy(_._1).map {
+      case (index, Right(value)) ⇒
+        s"\nCalculation number $index returned $value"
+      case (index, Left(error)) ⇒
+        s"\nCalculation number $index failed with error: ${error.message}"
     }.mkString(", ")
   }
 

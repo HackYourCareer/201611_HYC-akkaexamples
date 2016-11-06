@@ -1,9 +1,9 @@
-package com.szymik.hackyourcareer.actors.example2
+package com.szymik.hackyourcareer.actors.example3
 
 import akka.actor.{ActorSystem, Props}
 import com.szymik.hackyourcareer.actors.TerminatorActor
 
-object Example2 {
+object Example3 {
 
   def main(args: Array[String]): Unit = {
     val system = ActorSystem("PolitechnikaSlaska")
