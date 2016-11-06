@@ -32,24 +32,25 @@ class CalculationManagerActor extends Actor with ActorLogging {
 
   import context.dispatcher
 
-  override def preStart(): Unit = {
-    context.system.scheduler.scheduleOnce(50 milliseconds, self, Timeout)
-  }
-
   override def receive: Receive = {
 
     case Calculate(amount) ⇒
       val savedSender = sender()
-
       if (amount > 0) {
         val workers = startWorkers(amount)
         triggerCalculation(amount, workers)
+
+        scheduleTimeout
 
         context.become(waitForResults(amount, Map(), savedSender))
       }
       else {
         savedSender ! CalculationResult(Map())
       }
+  }
+
+  private def scheduleTimeout = {
+    context.system.scheduler.scheduleOnce(250 milliseconds, self, Timeout)
   }
 
   def waitForResults(amount: Int, results: Map[Int, Either[CalculationError, BigInt]], replyTo: ActorRef): Receive = {
